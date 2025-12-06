@@ -1,76 +1,72 @@
-const p1 = document.getElementById("player1");
-const p2 = document.getElementById("player2");
+const player1Input = document.getElementById("player1");
+const player2Input = document.getElementById("player2");
 const submitBtn = document.getElementById("submit");
+
 const game = document.getElementById("game");
-const playerForm = document.getElementById("player-form");
 const message = document.querySelector(".message");
 const cells = document.querySelectorAll(".cell");
 
-let playerOne = "";
-let playerTwo = "";
-let currentPlayer = "";
-let mark = "X";
-let board = Array(9).fill("");
+let player1 = "";
+let player2 = "";
+let currentPlayer = "X";
+let currentUserName = "";
 
 submitBtn.addEventListener("click", () => {
-    if (!p1.value || !p2.value) {
-        alert("Enter both player names!");
-        return;
-    }
+    player1 = player1Input.value.trim();
+    player2 = player2Input.value.trim();
 
-    playerOne = p1.value;
-    playerTwo = p2.value;
+    if (player1 === "" || player2 === "") return;
 
-    currentPlayer = playerOne;
+    currentUserName = player1;
 
-    playerForm.classList.add("hidden");
-    game.classList.remove("hidden");
+    document.getElementById("player-form").style.display = "none";
+    game.style.display = "block";
 
-    message.textContent = `${currentPlayer}, you're up`;
+    message.textContent = `${currentUserName}, you're up`;
 });
+
+const winningCombinations = [
+    [1,2,3], [4,5,6], [7,8,9],
+    [1,4,7], [2,5,8], [3,6,9],
+    [1,5,9], [3,5,7]
+];
 
 cells.forEach(cell => {
     cell.addEventListener("click", () => {
-        let id = parseInt(cell.id) - 1;
+        if (cell.textContent !== "") return;
 
-        if (board[id] !== "") return;
+        cell.textContent = currentPlayer;
 
-        board[id] = mark;
-        cell.textContent = mark;
-
-        if (checkWin()) {
-            message.textContent = `${currentPlayer} congratulations you won!`;
+        if (checkWinner()) {
+            message.textContent = `${currentUserName} congratulations you won!`;
             disableBoard();
             return;
         }
 
-        switchTurn();
+        switchPlayer();
     });
 });
 
-function switchTurn() {
-    if (mark === "X") {
-        mark = "O";
-        currentPlayer = playerTwo;
+function switchPlayer() {
+    if (currentPlayer === "X") {
+        currentPlayer = "O";
+        currentUserName = player2;
     } else {
-        mark = "X";
-        currentPlayer = playerOne;
+        currentPlayer = "X";
+        currentUserName = player1;
     }
-    message.textContent = `${currentPlayer}, you're up`;
+
+    message.textContent = `${currentUserName}, you're up`;
 }
 
-function checkWin() {
-    const wins = [
-        [0,1,2], [3,4,5], [6,7,8],
-        [0,3,6], [1,4,7], [2,5,8],
-        [0,4,8], [2,4,6]
-    ];
-
-    return wins.some(comb =>
-        comb.every(idx => board[idx] === mark)
-    );
+function checkWinner() {
+    return winningCombinations.some(comb => {
+        return comb.every(id => {
+            return document.getElementById(id).textContent === currentPlayer;
+        });
+    });
 }
 
 function disableBoard() {
-    cells.forEach(c => c.style.pointerEvents = "none");
+    cells.forEach(cell => cell.style.pointerEvents = "none");
 }
